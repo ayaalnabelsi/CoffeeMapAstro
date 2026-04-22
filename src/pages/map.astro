@@ -6,54 +6,117 @@
 npm install
 npm run dev
  -->
-<header>
-  <label for="site-search">Cafe zoeken</label>
-  <input type="search" id="site-search" name="q" />
-  <button>Zoeken</button>
-
-  <!-- <img href="" -->
-</header>
-<!--Container om de leaflet kaart erin te zetten -->
-<div id="map"></div>
-
-<!--CSS styling pijltjes, knoppen, zoom, control etc -->
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
 />
 
-<!-- Leaflet library zelf om de kaart te maken en manipuleren -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.css"
+/>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+<!--met is:inline hiermee zeg je tegen astro dat hij niks moet doen met js -->
+<!-- GeoSearch JS -->
 <script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-  crossorigin=""></script>
+  is:inline
+  src="https://unpkg.com/leaflet-geosearch@latest/dist/bundle.min.js"></script>
+
 <script>
   // @ts-nocheck
+  // MAP (maar 1 keer!)//
+  const map = L.map("map").setView([52.37, 4.9], 13);
 
-  //   L.map maakt de leaflet kaart met de id map//
-  //   13 is de zoomlevel aantal steden en straten//
-  // .SetView de middenpunt bepalen van de kaart//
-  
-  const map = L.map("map").setView([51.505, -0.09], 13);
-  //   leaflet vertellen welke kaart geladen moet worden//
+  //TILE LAYER//
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution:
-      '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    attribution: "&copy; OpenStreetMap",
   }).addTo(map);
-  //   addTo map voegt de titels toe aan de map//
 
-  // Markers toevoegen//
-  var marker = L.marker([51.5, -0.09]).addTo(map);
-  marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+  //MARKER//
+  L.marker([52.37, 4.9]).addTo(map).bindPopup("Coffee App ☕");
+
+  //CIRCLE//
+  L.circle([52.379, 4.883], {
+    color: "red",
+    fillColor: "#f03",
+    fillOpacity: 0.5,
+    radius: 500,
+  }).addTo(map);
+
+  //POLYGON//
+  L.polygon([
+    [52.36, 4.91],
+    [52.365, 4.93],
+    [52.355, 4.94],
+  ]).addTo(map);
+
+  //CLICK EVENT//
+  const popup = L.popup();
+
+  map.on("click", (e) => {
+    popup
+      .setLatLng(e.latlng)
+      .setContent("Je klikte op: " + e.latlng.toString())
+      .openOn(map);
+  });
+
+  // map.addControl(search);
+  // map.addControl(searchControl);
+  // const provider = new GeoSearch.OpenStreetMapProvider();
+
+  const searchControl = new GeoSearch.GeoSearchControl({
+    provider: new GeoSearch.OpenStreetMapProvider(),
+    style: "bar",
+    autoComplete: true,
+    autoCompleteDelay: 250,
+  });
+
+  map.addControl(searchControl);
+
+// SHARE DATA
+const shareData = {
+  title: "Coffee ☕",
+  text: "Bekijk deze coffee locatie!",
+  url: "https://www.google.com/maps?q=52.37,4.9",
+};
+
+// MARKER
+const marker = L.marker([52.37, 4.9]).addTo(map);
+
+marker.bindPopup(`
+  <div>
+    <h3>Coffee ☕</h3>
+    <button id="shareBtn">Deel locatie</button>
+    <p class="result"></p>
+  </div>
+`);
+
+// wanneer popup opent
+marker.on("popupopen", () => {
+  const btn = document.querySelector("#shareBtn");
+  const resultPara = document.querySelector(".result");
+
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.share(shareData);
+      resultPara.textContent = "Shared successfully ✅";
+    } catch (err) {
+      resultPara.textContent = `Error: ${err}`;
+    }
+  });
+});
 </script>
 
 <style>
   #map {
     height: 400px;
-    margin-top: em;
+    margin-top: 1em;
   }
 
   header {
@@ -64,3 +127,11 @@ npm run dev
     gap: 1em;
   }
 </style>
+
+<!--https://leafletjs.com/examples/quick-start/-->
+<!--Leaflet kaart ingeladen: Kaartland aangepast naar Amsterdam, zoom aangepast op stad  10, popups toegevoegd, circel toegevoegd, polygon toegevoegd, popup bij klik-->
+<!--leaflet geosearch ingeladen-->
+<!--Content api-->
+
+<!--//https://leafletjs.com//
+//https://leaflet-geosearch.meijer.works/#installation// -->

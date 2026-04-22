@@ -35,13 +35,12 @@ Daarnaast bevat de app een pagina met cafés waar studenten goed kunnen studeren
 - Eerst kijken naar api's welke data er allemaal beschikbaar is.
 - Woensdag nog een keer feedback vragen over concept 
 
-
 # Week 2
 # Woensdag 
 # Feedback 
 Aangezien er geen API bestaat die specifieke cafés bijv Italiaans kan ophalen overweeg ik om een algemene kaart te tonen met de dichtstbijzijnde cafés in de buurt van de gebruiker. De gebruiker kan op de pins klikken om informatie over het café te bekijken.
 
- Als er tijd over is ga ik de LocalStorage gebruiken om favoriete cafés op te slaan hiervoor is extra tijd nodig om componenten, knoppen en interacties te bouwen, omdat veel tijd naar de kaart en bijbehorende functionaliteiten gaat.
+Als er tijd over is ga ik de LocalStorage gebruiken om favoriete cafés op te slaan hiervoor is extra tijd nodig om componenten, knoppen en interacties te bouwen, omdat veel tijd naar de kaart en bijbehorende functionaliteiten gaat.
 
 # Concept aanpassing
 Webapp waarmee gebruikers cafés in de buurt kunnen vinden en locaties kunnen delen met anderen en als favoriete markeren.
@@ -55,7 +54,7 @@ Een kaart waarop cafés in de buurt worden getoond.
 Wanneer een gebruiker op een café pin klikt met informatie over het café.
 
 # Content API:
-# Google Maps API 
+# Leaflet API 
  Om de kaart te bouwen en locaties te tonen.
 
 # Web API:
@@ -77,6 +76,7 @@ JSON.parse() om data terug te halen
 - localStorage.clear() verwijdert alles definitief.
 - SessionStorage werkt hetzelfde, maar is tijdelijk → LocalStorage gebruik je voor langdurige opslag.
 
+# Waar heb ik aan gewerkt 
 - Nieuw Astro project aangemaakt.
 - Content API ingeladen.
 - Kaart gemaakt met pin.
@@ -84,3 +84,5 @@ JSON.parse() om data terug te halen
 
 # Bronnen
 - https://leafletjs.com/examples/quick-start/ 
+- Schrijven per dag wat wil ik doen 
+- Cordinaat Api 
