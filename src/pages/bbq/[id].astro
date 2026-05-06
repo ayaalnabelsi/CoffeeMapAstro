@@ -1,0 +1,195 @@
+---
+// @ts-nocheck
+// Voor elke BBQ locatie wordt er een eigen pagina gemaakt zoals /bbq/0, /bbq/1 etc.
+export async function getStaticPaths() {
+  const res = await fetch(
+    "https://maps.amsterdam.nl/open_geodata/geojson_lnglat.php?KAARTLAAG=BBQ&THEMA=bbq"
+  );
+  const data = await res.json();
+
+  //   .map() loopt door alle locaties heen, index is het nummer (0, 1, 2...)
+  return data.features.map((place, index) => ({
+    params: { id: String(index) },
+    //  props gegevens die we meesturen naar de pagina
+    // ||als dit leeg is, gebruik dan de tekst erna
+    props: {
+      naam: place.properties.Naam || "Onbekend",
+      status: place.properties.Status || "Onbekend",
+      uitleg: place.properties.Toelichting || "Geen toelichting",
+    },
+  }));
+}
+const { naam, status, uitleg } = Astro.props;
+let statusKleur;
+
+if (status === "Verbod") {
+  statusKleur = "verbod";
+} else if (status === "Restricties") {
+  statusKleur = "restricties";
+} else {
+  statusKleur = "onbekend";
+}
+---
+
+<div class="header">
+  <h1>Detailspagina Park</h1>
+</div>
+
+<div class="container">
+    <div class="kaart">
+      <p class="naam">{naam}</p>
+      <span class={`status ${statusKleur}`}>
+        {status}
+      </span>
+      <hr class="lijn" />
+      <div class="blok">
+        <span class="title">Toelichting</span>
+        <span class="tekst">{uitleg}</span>
+      </div>
+    </div>
+  
+    <div class="knoppen">
+      <button id="opslaanBtn"> Sla op als favoriet</button>
+      <a href="/" class="terug">Terug naar kaart</a>
+    </div>
+  </div>
+
+<!-- De variabelen leven op de server in het frontmatter, en define:vars geeft ze door aan de browser in de script tag. -->
+<!-- Define geeft de variabele door aan de browser -->
+
+</div>
+
+<script define:vars={{ naam, status, uitleg }}>
+  document.getElementById("opslaanBtn").addEventListener("click", function () {
+    //  Huidige favorieten ophalen
+    const favorieten = JSON.parse(localStorage.getItem("favorieten") || "[]");
+
+    // Nieuwe favoriet aanmaken
+    favorieten.push({ naam: naam, status: status, uitleg: uitleg });
+
+    //  Opslaan in localStorage
+    localStorage.setItem("favorieten", JSON.stringify(favorieten));
+
+    // Terug naar de kaart
+    window.location.href = "/";
+  });
+</script>
+
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 4px solid #ec0000;
+    padding: 0.75rem 1.5rem;
+    background-color: aliceblue;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+    color: #111;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .kaart {
+    background: white;
+    border: 3px solid #ec0000;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .naam {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .status {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .status.verbod {
+    background: #ec0000;
+  }
+
+  .status.restricties {
+    background: #ffff00;
+    color: #111;
+  }
+
+  .blok {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #888;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .knoppen {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+#opslaanBtn {
+  padding: 0.6rem 1.2rem;
+  background: #ec0000;
+  color: white;
+  border: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+#opslaanBtn:hover {
+  background: #b30000;
+}
+
+.terug {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  background: white;
+  color: #ec0000;
+  border: 2px solid #ec0000;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  text-align: center;
+  flex: 1;
+}
+
+.terug:hover {
+  background: #f5f5f5;
+}
+</style>

@@ -125,7 +125,37 @@ Ik heb ervoor gekozen om de detailinformatie op dezelfde pagina te tonen voor ee
 # Week4
 # Woensdag
 Readme aangevuld 
-Bronvermelding nagelopen en vermeld 
+Bronvermelding nagelopen en gedocomenteerd  
+
+voorwaarden apis gechekd 
+Web APIs  
+Geolocation API
+localStorage API
+
+Content APIs
+Gemeente Amsterdam Open Geodata API
+OpenStreetMap Tile API 
+
+Library
+Leaflet.js 
+
+Code begrijpen en uitleg 
+# Feedback 
+- Alles wat in map staat naar index en map en lpcalstorage verwijderen 
+- SS Renderen
 
 # Donderdag
  Mondeling
+
+ # Bronnen
+- https://leafletjs.com/examples/quick-start/ 
+- https://leafletjs.com
+- https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API 
+- https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+- https://maps.amsterdam.nl/open_geodata/
+- https://tile.openstreetmap.org
+- https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+- https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/fill-opacity
+- https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+- https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+- https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/calc 

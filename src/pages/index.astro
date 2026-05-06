@@ -1,18 +1,350 @@
 ---
-
+const res = await fetch(
+  "https://maps.amsterdam.nl/open_geodata/geojson_lnglat.php?KAARTLAAG=BBQ&THEMA=bbq"
+);
+const data = await res.json();
 ---
-<!--HOMEPAGE -->
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-	<!-- <icon href="fac.icon" type="image/x-icon"> </icon> -->
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+  <!-- // verwijzen naar id 
+ npm install leaflet
+npm install
+npm run dev
+--><!-- Leaflet css -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<div class="header">
+  <img src="/Ams.png" alt="Amsterdam Logo" />
+  <h1 class="titel">BBQ Plekken Amsterdam</h1>
+</div>
+
+<div class="layout">
+  <!-- Kaartkolom -->
+  <div class="panel">
+    <p class="beschrijving">
+      Deze app toont alle BBQ locaties in Amsterdam op basis van open data van
+      de gemeente.
+    </p>
+    <p class="beschrijving-2">Klik op een marker om meer details te zien.</p>
+
+    <div id="map"></div>
+    <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+
+    <div class="kleurcode">
+      <h3>Legenda</h3>
+      <ul>
+        <!-- Span voor kleurblokjes ja nee -->
+        <li><span class="nee"></span> Rood: BBQ niet toegestaan</li>
+        <li><span class="ja"></span> Geel: BBQ toegestaan</li>
+        <li><span class="onbekend"></span> Grijs: Status onbekend</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="Favblok">
+    <h3>Opgeslagen plekken</h3>
+    <ul id="favorietenLijst"></ul>
+    <button id="wisBtn">Verwijder alle favorieten</button>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  // LEAFLET
+  // Setview=Startpositie op de kaart. 13 zoomniveau
+  const map = L.map("map", {
+    minZoom: 11,
+    maxBounds: [
+      // zuidwest  Amsterdam
+      [52.25, 4.72],
+      // noordoost Amsterdam
+      [52.48, 5.08],
+    ],
+  }).setView([52.37, 4.9], 13);
+
+  // Achtergrondskaart
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap",
+  }).addTo(map);
+
+  // GEOLOCATION API
+  // https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
+  const options = {
+    // nauwkeurige locatie vragen
+    enableHighAccuracy: true,
+    // Hoelang de browser mag wachten op een locatie
+    timeout: 5000,
+    maximumAge: 0,
+  };
+
+  // locatie gebruiker ophalen en bij toestaan positie centreren+marker
+  navigator.geolocation.getCurrentPosition(
+    function (position) {
+      // latitude is hoe ver je noord/zuid bent
+      // longitude hoe ver je oost/west bent
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      map.setView([latitude, longitude], 13);
+      L.marker([latitude, longitude])
+        .addTo(map)
+        .bindPopup("📍 Jouw locatie")
+        .openPopup();
+    },
+    // bij locatie weigeren foutmelding
+    // chatgpt
+    function (err) {
+      // + stukken text aan elkaar plakken dus error+message
+      console.warn("ERROR(" + err.code + "): " + err.message);
+      // console.warn tonen als een waarschuwing in de browser
+    }
+  );
+
+  // GEMEENTE AMSTERDAM OPEN GEODATA API
+  // BBQ data geholpen door Jad
+  // https://maps.amsterdam.nl/open_geodata/geojson_lnglat.php?KAARTLAAG=BBQ&THEMA=bbq
+  fetch(
+    "https://maps.amsterdam.nl/open_geodata/geojson_lnglat.php?KAARTLAAG=BBQ&THEMA=bbq"
+  )
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      const group = L.layerGroup().addTo(map);
+      // geholpen door Jad
+      data.features.forEach(function (place, index) {
+        let item = place.geometry.coordinates[0][0];
+        if (item.length !== 2) item = item[0];
+
+        // GeoJSON: [longitude, latitude] — omgekeerd van Leaflet
+        const lat = item[1];
+        const lng = item[0];
+
+        // Data uit API properties
+        // || als dit leeg is de alternatief tekst gebruiken
+        const naam = place.properties.Naam || "Onbekend";
+        const status = place.properties.Status || "Onbekend";
+        const uitleg = place.properties.Toelichting || "";
+
+        // Kleur op basis van status uit API
+        let kleur;
+        // === checkt of 2 dingen dezelfde zijn
+        if (status === "Verbod") kleur = "#EC0000";
+        else if (status === "Restricties") kleur = "#ffff00";
+        else kleur = "#888";
+
+        // locatiecirkels
+        const cirkel = L.circleMarker([lat, lng], {
+          radius: 6,
+          color: kleur,
+          fillColor: kleur,
+          // https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/fill-opacity
+          // doorzichtigheid
+          fillOpacity: 0.8,
+          weight: 2,
+        })
+          .addTo(group)
+          .bindPopup(
+            "<div>" +
+              "<strong>" +
+              naam +
+              "</strong><br>" +
+              "Status: " +
+              status +
+              "<br>" +
+              "Toelichting: " +
+              uitleg +
+              "</div>"
+          );
+
+        // hover effect
+        // Chatgpt
+        cirkel.on("mouseover", function () {
+          this.setRadius(12);
+        });
+        cirkel.on("mouseout", function () {
+          this.setRadius(6);
+        });
+
+        // bij klik naar detailpagina navigeren
+        cirkel.on("click", function () {
+          window.location.href = `/bbq/${index}`;
+        });
+      });
+    });
+
+  // LOCALSTORAGE — favorietenlijst tonen bij pagina laden
+  // met || "[]" krijg ik altijd een array terug
+  const favorieten = JSON.parse(localStorage.getItem("favorieten") || "[]");
+  const lijst = document.getElementById("favorietenLijst");
+
+  favorieten.forEach(function (f) {
+    const li = document.createElement("li");
+    li.textContent = f.naam + " — " + f.status;
+    lijst.appendChild(li);
+  });
+
+  // MDN localStorage — clear() om alle favorieten te wissen
+  document.getElementById("wisBtn").addEventListener("click", function () {
+    localStorage.removeItem("favorieten");
+    // innerHTML lijst op de pagina leegmaken
+    document.getElementById("favorietenLijst").innerHTML = "";
+  });
+</script>
+
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 4px solid #ec0000;
+    padding: 0.75rem;
+    background-color: aliceblue;
+  }
+
+  .header img {
+    width: 80px;
+    height: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .titel {
+    margin: 0;
+    font-size: 1.5rem;
+    font-family: sans-serif;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    /* volledige schermhoogte vullen minus de header */
+    /* https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/calc */
+    height: calc(100vh - 80px);
+    font-family: sans-serif;
+    background: #f5f5f5;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+  }
+
+  .beschrijving {
+    text-align: center;
+  }
+
+  .beschrijving-2 {
+    text-align: center;
+    font-weight: 700;
+    color: #ec0000;
+    font-size: 0.9rem;
+  }
+
+  #map {
+    flex: 1;
+    border: 3px solid #ec0000;
+  }
+
+  .kleurcode {
+    background: white;
+    padding: 0.75rem 1rem;
+    border: 2px solid #ec0000;
+    font-size: 14px;
+  }
+
+  .kleurcode h3 {
+    color: #ec0000;
+    margin-bottom: 0.4rem;
+    font-size: 14px;
+  }
+
+  .kleurcode ul {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .kleurcode li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 12px;
+  }
+
+  .nee,
+  .ja,
+  .onbekend {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .nee {
+    background-color: #ec0000;
+  }
+  .ja {
+    background-color: #ffff00;
+    border: 1px solid #ccc;
+  }
+  .onbekend {
+    background-color: gray;
+  }
+
+  .Favblok {
+    background: white;
+    border: 3px solid #ec0000;
+    padding: 1.5rem;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+  }
+
+  .Favblok ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  #wisBtn {
+    padding: 0.6rem 1.2rem;
+    background: white;
+    color: #ec0000;
+    border: 2px solid #ec0000;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  #wisBtn:hover {
+    background: #ec0000;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .layout {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+
+    #map {
+      height: 300px;
+      flex: none;
+    }
+  }
+</style>
