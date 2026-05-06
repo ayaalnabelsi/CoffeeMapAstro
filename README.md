@@ -55,14 +55,16 @@ Wanneer een gebruiker op een café pin klikt met informatie over het café.
 
 # Content API:
 # Leaflet API 
- Om de kaart te bouwen en locaties te tonen.
+ Om de kaart te bouwen, markers en popups.
 
 # Web API:
 # Share API 
 Om een café locatie te delen via bijvoorbeeld WhatsApp of andere apps.
 
 # Geolocation:
+om locatie te delen met de webaplicatie, eerst om toestemming vragen, 
 Gebruiken om het land/locatie te bepalen.
+`navigator.geolocation.getCurrentPosition()`
 
 # Donderdag
 # Workshop LocalStorage
@@ -86,3 +88,44 @@ JSON.parse() om data terug te halen
 - https://leafletjs.com/examples/quick-start/ 
 - Schrijven per dag wat wil ik doen 
 - Cordinaat Api 
+
+
+# Week 3
+# Woe 22/4
+- Leaflet api ingeladen
+- geosearch ingeladen 
+- Googlemaps api inladen mislukt cridetcardt vereist niet verder gekomen omdat alle locatieapis waarmee ik evt caffees kan inladen vragen om een creditcard en zijn betaald. 
+
+- leaflet content api 
+- zoekbalk
+- markers, popup
+- share api
+- geolocation api
+
+# Donderdag 
+Ik ben overgestapt naar de content API van Open Data Amsterdam, omdat er geen gratis API beschikbaar is voor cafés.
+
+Met deze API heb ik gegevens opgehaald van parken in Amsterdam waar je kunt barbecueën, zoals de naam van het park, de status en de toelichting. Ook heb ik de huisstijl van Amsterdam toegepast in mijn ontwerp.
+
+Ik heb ervoor gekozen om de detailinformatie op dezelfde pagina te tonen voor een betere UX ervaring. Wanneer een gebruiker op een locatie klikt, verschijnen de details van het park onder de kaart daar kan de gebruiker het park opslaan of verwijderen, hiervoor gebruik ik de localStorage API. Hierdoor blijven opgeslagen parken bewaard ook als de pagina opnieuw wordt geladen.
+
+# Vrijdag
+# Feedback
+- Responsief 
+- Locatie POpup evt op de kaart ipv gelijk locatie toestaan (je bevindt je nu op een kaart met plekken in Amsterdam waar je kan bbqen wil je je locatie toestaan?
+- Niet meer kunnen inzoomen dan Amsterdam 
+- Op detailspagina kaart laten inzoomen op de geklikte locatie 
+- Amsterdam huisstyle 
+- Op homepage text 
+- Status waar je wel en niet kan bbqen
+- Detailpagina naast de map ipv naar een andere pagina 
+- Logo ams website
+- Ux meenemen 
+
+# Week4
+# Woensdag
+Readme aangevuld 
+Bronvermelding nagelopen en vermeld 
+
+# Donderdag
+ Mondeling
