@@ -1,13 +1,13 @@
 ---
 // @ts-nocheck
-// Voor elke BBQ locatie wordt er een eigen pagina gemaakt zoals /bbq/0, /bbq/1 etc.
+// Voor elke BBQ locatie wordt er een eigen pagina gemaakt.
 export async function getStaticPaths() {
   const res = await fetch(
     "https://maps.amsterdam.nl/open_geodata/geojson_lnglat.php?KAARTLAAG=BBQ&THEMA=bbq"
   );
   const data = await res.json();
 
-  //   .map() loopt door alle locaties heen, index is het nummer (0, 1, 2...)
+  //  loopt door alle locaties heen, index is het nummer (0, 1, 2...)
   return data.features.map((place, index) => ({
     params: { id: String(index) },
     //  props gegevens die we meesturen naar de pagina
@@ -29,18 +29,20 @@ if (status === "Verbod") {
 } else {
   statusKleur = "onbekend";
 }
+// https://docs.astro.build/en/guides/routing/
+// Example: Dynamic pages at multiple levels
 ---
 
 <div class="header">
   <h1>Detailspagina Park</h1>
 </div>
-
 <div class="container">
     <div class="kaart">
       <p class="naam">{naam}</p>
       <span class={`status ${statusKleur}`}>
         {status}
       </span>
+      <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/hr -->
       <hr class="lijn" />
       <div class="blok">
         <span class="title">Toelichting</span>
@@ -54,17 +56,15 @@ if (status === "Verbod") {
     </div>
   </div>
 
+</div>
 <!-- De variabelen leven op de server in het frontmatter, en define:vars geeft ze door aan de browser in de script tag. -->
 <!-- Define geeft de variabele door aan de browser -->
-
-</div>
-
 <script define:vars={{ naam, status, uitleg }}>
   document.getElementById("opslaanBtn").addEventListener("click", function () {
     //  Huidige favorieten ophalen
     const favorieten = JSON.parse(localStorage.getItem("favorieten") || "[]");
 
-    // Nieuwe favoriet aanmaken
+    // Nieuwe favoriet toevoegn aan de lijst
     favorieten.push({ naam: naam, status: status, uitleg: uitleg });
 
     //  Opslaan in localStorage

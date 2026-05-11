@@ -1,14 +1,12 @@
 ---
+// Data uit API Opgehaald en omgezet naar json
 const res = await fetch(
   "https://maps.amsterdam.nl/open_geodata/geojson_lnglat.php?KAARTLAAG=BBQ&THEMA=bbq"
 );
 const data = await res.json();
 ---
-  <!-- // verwijzen naar id 
- npm install leaflet
-npm install
-npm run dev
---><!-- Leaflet css -->
+
+<!-- Leaflet css -->
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -53,7 +51,8 @@ npm run dev
 <script>
   // @ts-nocheck
   // LEAFLET
-  // Setview=Startpositie op de kaart. 13 zoomniveau
+  // Kaart maken en Setview bepalen=
+  // Startpositie op de kaart. 13 zoomniveau
   const map = L.map("map", {
     minZoom: 11,
     maxBounds: [
@@ -69,6 +68,7 @@ npm run dev
     maxZoom: 19,
     attribution: "&copy; OpenStreetMap",
   }).addTo(map);
+
 
   // GEOLOCATION API
   // https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
@@ -93,6 +93,7 @@ npm run dev
         .bindPopup("📍 Jouw locatie")
         .openPopup();
     },
+    
     // bij locatie weigeren foutmelding
     // chatgpt
     function (err) {
@@ -102,6 +103,7 @@ npm run dev
     }
   );
 
+  
   // GEMEENTE AMSTERDAM OPEN GEODATA API
   // BBQ data geholpen door Jad
   // https://maps.amsterdam.nl/open_geodata/geojson_lnglat.php?KAARTLAAG=BBQ&THEMA=bbq
@@ -114,15 +116,19 @@ npm run dev
     .then(function (data) {
       const group = L.layerGroup().addTo(map);
       // geholpen door Jad
+      // een voor een door alle BBQ plekken heenlopen.
       data.features.forEach(function (place, index) {
         let item = place.geometry.coordinates[0][0];
+        // deze regel zorgt ervoor dat ik altijd de juiste coordinaten uit de 
+        // API haal, ook als de data extra genest is.
+
         if (item.length !== 2) item = item[0];
 
-        // GeoJSON: [longitude, latitude] — omgekeerd van Leaflet
+        // GeoJSON [longitude, latitude] omgekeerd van Leaflet
         const lat = item[1];
         const lng = item[0];
 
-        // Data uit API properties
+        // Data uit API properties ophalen
         // || als dit leeg is de alternatief tekst gebruiken
         const naam = place.properties.Naam || "Onbekend";
         const status = place.properties.Status || "Onbekend";
@@ -136,6 +142,7 @@ npm run dev
         else kleur = "#888";
 
         // locatiecirkels
+        // cirkel op de kaart Voor elke BBQ plek.
         const cirkel = L.circleMarker([lat, lng], {
           radius: 6,
           color: kleur,
@@ -145,6 +152,7 @@ npm run dev
           fillOpacity: 0.8,
           weight: 2,
         })
+          // popup toegevoegd om details te laten zien
           .addTo(group)
           .bindPopup(
             "<div>" +
@@ -170,26 +178,33 @@ npm run dev
 
         // bij klik naar detailpagina navigeren
         cirkel.on("click", function () {
+          // $een variabele in de tekst die automatisch wordt ingevuld door js.
           window.location.href = `/bbq/${index}`;
         });
       });
     });
 
-  // LOCALSTORAGE — favorietenlijst tonen bij pagina laden
-  // met || "[]" krijg ik altijd een array terug
+  // LOCALSTORAGE favorietenlijst tonen bij pagina laden
+  // met || "[]" krijg ik altijd een array terug als er geen data 
+  // gevonden is krijg ik een lege array terug
   const favorieten = JSON.parse(localStorage.getItem("favorieten") || "[]");
+  // html lijst waarin de fav moeten komen 
   const lijst = document.getElementById("favorietenLijst");
 
+  // door alle fav heen lopen
   favorieten.forEach(function (f) {
+    // voor elke fav een nieuwe li maken 
     const li = document.createElement("li");
+    // naam en status aan de li koppelen
     li.textContent = f.naam + " — " + f.status;
+    // lijst toevoegen aan html
     lijst.appendChild(li);
   });
 
-  // MDN localStorage — clear() om alle favorieten te wissen
+  //  om alle favorieten te wissen
   document.getElementById("wisBtn").addEventListener("click", function () {
     localStorage.removeItem("favorieten");
-    // innerHTML lijst op de pagina leegmaken
+    // innerHTML lijst op de pagina  visueel leegmaken
     document.getElementById("favorietenLijst").innerHTML = "";
   });
 </script>
